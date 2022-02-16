@@ -49,7 +49,7 @@
         <thead>
             <tr>
                 <th data-field="id">ID</th>
-                <th data-field="full_name">Dealer Name</th>
+                <td><a href="{% url 'djangoapp:dealer_details' dealer.id %}">{{dealer.full_name}}</a></td>
                 <th data-field="city">City</th>
                 <th data-field="address">Address</th>
                 <th data-field="zip">Zip</th>

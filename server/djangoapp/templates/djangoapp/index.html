@@ -1,89 +1,78 @@
-from django.shortcuts import render
-from django.http import HttpResponseRedirect, HttpResponse
-from django.contrib.auth.models import User
-from django.shortcuts import get_object_or_404, render, redirect
-from .models import CarDealer
-from .restapis import get_dealers_from_cf
-from django.contrib.auth import login, logout, authenticate
-from django.contrib import messages
-from datetime import datetime
-import logging
-import json
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dealership Review</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <link href="https://unpkg.com/bootstrap-table@1.18.2/dist/bootstrap-table.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/bootstrap-table@1.18.2/dist/bootstrap-table.min.js"></script>
+    <script src="https://unpkg.com/bootstrap-table@1.18.2/dist/extensions/filter-control/bootstrap-table-filter-control.min.js"></script>
 
-# Get an instance of a logger
-logger = logging.getLogger(__name__)
+</head>
 
-
-# Create your views here.
-
-
-# Create an `about` view to render a static about page
-def about(request):
-    context = {}
-    if request.method == "GET":
-        return render(request, 'djangoapp/about.html', context)
-
-# Create a `contact` view to return a static contact page
-def contact(request):
-    context = {}
-    if request.method == "GET":
-        return render(request, 'djangoapp/contact.html', context)
-
-# Create a `login_request` view to handle sign in request
-def login_request(request):
-    # Handles POST request
-    if request.method == "POST":
-        # Get username and password from request.POST dictionary
-        username = request.POST['username']
-        password = request.POST['psw']
-        # Try to check if provide credential can be authenticated
-        user = authenticate(username=username, password=password)
-        if user is not None:
-            # If user is valid, call login method to login current user
-            login(request, user)
-            return redirect('onlinecourse:popular_course_list')
-        else:
-            # If not, return to login page again
-            return render(request, 'djangoapp/login.html', context)
-    else:
-        return render(request, 'djangoapp/login.html', context)
-
-# Create a `logout_request` view to handle sign out request
-def logout_request(request):
-    # Get the user object based on session id in request
-    print("Log out the user `{}`".format(request.user.username))
-    # Logout user in the request
-    logout(request)
-    # Redirect user back to course list view
-    return redirect('onlinecourse:popular_course_list')
-
-# Create a `registration_request` view to handle sign up request
-def registration_request(request):
-    # Get the user object based on session id in request
-    print("Registration `{}`".format(request.user.username))    
-    return render(request, 'djangoapp/registration.html', context)
-
-# Update the `get_dealerships` view to render the index page with a list of dealerships
-def get_dealerships(request):
-    if request.method == "GET":
-        url = "https://8553143b.us-south.apigw.appdomain.cloud/myapi/getalldealerships"
-        # Get dealers from the URL
-        dealerships = get_dealers_from_cf(url)
-        # Concat all dealer's short name
-        dealer_names = ' '.join([dealer.short_name for dealer in dealerships])
-        # Return a list of dealer short name
-
-        return render(request,"djangoapp/index.html",{"dealership_list":dealerships})
-
-        # return HttpResponse(dealer_names)
-
-# Create a `get_dealer_details` view to render the reviews of a dealer
-def get_dealer_details(request, dealer_id):
-    context = {}
-    return render(request, 'djangoapp/dealer_details.html', context)
-
-# Create a `add_review` view to submit a review
-def add_review(request, dealer_id):
-    context = {}
-    return render(request, 'djangoapp/add_review.html', context)
-
+    <body>
+    
+    <!--Add a nav bar here -->
+    <nav class="navbar navbar-light bg-light">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="#">Dealer Review</a>
+                <a class="navbar-brand" href="/djangoapp/about">About US</a>
+            </div>
+            <ul class="nav navbar-nav navbar-right">
+                {% if user.is_authenticated %}
+                <li>
+                    <a class="btn btn-link" href="#">{{ user.first_name }}({{ user.username }})</a>
+                    <a class="btn btn-link" href="{% url 'djangoapp:logout' %}">Logout</a>
+                </li>
+                {% else %}
+                <li>
+                    <form class="form-inline" action="{% url 'djangoapp:login' %}" method="post">
+                        {% csrf_token %}
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="Username" name="username" >
+                            <input type="password" class="form-control" placeholder="Password" name="psw" >
+                            <button class="btn btn-primary" type="submit">Login</button>
+                            <a class="btn btn-link" href="{% url 'djangoapp:registration' %}">Sign Up</a>
+                        </div>
+                    </form>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+    <!--Add a dealer table here -->
+    <table class="table" id="table" data-filter-control="true">
+        <thead>
+            <tr>
+                <th data-field="id">ID</th>
+                <th data-field="name">Name</th>
+                <th data-field="city">City</th>
+                <th data-field="address">Address</th>
+                <th data-field="zip">Zip</th>
+                <th data-field="state" data-filter-control="select">State</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for dealer in dealership_list %}
+                <tr>
+                    <td>{{dealer.id}}</td>
+                    <td><a href="{% url 'djangoapp:dealer_detail' %}{{dealer.id}}">{{dealer.full_name}}</a></td>
+                    <td>{{dealer.city}}</td>
+                    <td>{{dealer.address}}</td>
+                    <td>{{dealer.zip}}</td>
+                    <td>{{dealer.state}}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </body>
+    <script>
+        $(function() {
+          $('#table').bootstrapTable()
+        })
+      </script>
+</html>

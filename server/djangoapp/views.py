@@ -93,7 +93,7 @@ def get_dealerships(request):
         dealer_names = ' '.join([dealer.short_name for dealer in dealerships])
         # Return a list of dealer short name
 
-        return render(request,"djangoapp/index.html",{"dealership_list":dealer_names})
+        return render(request,"djangoapp/index.html",{"dealership_list":dealerships})
 
         # return HttpResponse(dealer_names)
 

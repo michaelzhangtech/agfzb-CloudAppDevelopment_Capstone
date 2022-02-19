@@ -31,6 +31,7 @@ def contact(request):
 
 # Create a `login_request` view to handle sign in request
 def login_request(request):
+    context = {}
     # Handles POST request
     if request.method == "POST":
         # Get username and password from request.POST dictionary

@@ -16,23 +16,23 @@
     <body>
     
     <!--Add a nav bar here -->
-    <nav class="navbar navbar-light bg-light">
-        <div class="container-fluid">
-            <div class="navbar-header">
-                <a class="navbar-brand" href="#">DBest Cars Dealership</a>
-                <div class="collapse navbar-collapse" id="dealernav">
-                    <a class="nav-link" href="/djangoapp/about/">About</a>
-                    <a class="nav-link" href="/djangoapp/contact/">Contact Us</a>
-            </div>
-            </div>
-            <ul class="nav navbar-nav navbar-right">
-                {% if user.is_authenticated %}
-                <li>
+    <nav class="navbar navbar-expand-md navbar-light">
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#dealernav" aria-controls="navbarTogglerDealerNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+      </button>
+      <a class="navbar-brand" href="#">Best Cars Dealership</a>
+      <div class="collapse navbar-collapse" id="dealernav">
+              <a class="nav-link" href="/djangoapp/about/">About</a>
+              <a class="nav-link" href="/djangoapp/contact/">Contact Us</a>
+      </div>
+      <div class="nav navbar-nav navbar-right">
+          {% if user.is_authenticated %}
+                
                     <a class="btn btn-link" href="#">{{ user.first_name }}({{ user.username }})</a>
                     <a class="btn btn-link" href="{% url 'djangoapp:logout' %}">Logout</a>
-                </li>
+                
                 {% else %}
-                <li>
+               
                     <form class="form-inline" action="{% url 'djangoapp:login' %}" method="post">
                         {% csrf_token %}
                         <div class="input-group">
@@ -42,19 +42,14 @@
                             <a class="btn btn-link" href="{% url 'djangoapp:registration' %}">Sign Up</a>
                         </div>
                     </form>
-                </li>
+                
                 {% endif %}
-            </ul>
-        </div>
-    </nav>
+      </div>
+  </nav> 
     Company Contact:
 1. Phone Number
 2. Web site
     </body>
-    <script>
-        $(function() {
-          $('#table').bootstrapTable()
-        })
-      </script>
+    
 </html>
 

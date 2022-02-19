@@ -55,14 +55,34 @@ def logout_request(request):
     # Logout user in the request
     logout(request)
     # Redirect user back to course list view
-    return redirect('onlinecourse:popular_course_list')
+    return redirect('djangoapp/index.html')
 
 # Create a `registration_request` view to handle sign up request
 def registration_request(request):
-    # Get the user object based on session id in request
-    print("Registration `{}`".format(request.user.username))    
-    return render(request, 'djangoapp/registration.html', context)
-
+    context = {}
+    if request.method == 'GET':
+        return render(request, 'djangoapp/registration.html', context)
+    elif request.method == 'POST':
+        # Check if user exists
+        username = request.POST['username']
+        password = request.POST['psw']
+        first_name = request.POST['firstname']
+        last_name = request.POST['lastname']
+        user_exist = False
+        try:
+            User.objects.get(username=username)
+            user_exist = True
+        except:
+            logger.error("New user")
+        if not user_exist:
+            user = User.objects.create_user(username=username, first_name=first_name, last_name=last_name,
+                                            password=password)
+            login(request, user)
+            return redirect("djangoapp:index")
+        else:
+            context['message'] = "User already exists."
+            return render(request, 'djangoapp/registration.html', context)
+    
 # Update the `get_dealerships` view to render the index page with a list of dealerships
 def get_dealerships(request):
     if request.method == "GET":
@@ -73,7 +93,7 @@ def get_dealerships(request):
         dealer_names = ' '.join([dealer.short_name for dealer in dealerships])
         # Return a list of dealer short name
 
-        return render(request,"djangoapp/index.html",{"dealership_list":dealerships})
+        return render(request,"djangoapp/index.html",{"dealership_list":dealer_names})
 
         # return HttpResponse(dealer_names)
 
